@@ -4,6 +4,7 @@ import logger from "../logs/logger.js";
 import { Status } from "../constants/index.js";
 import { hash } from "bcrypt";
 import { hashPassword } from "../common/bcrypt.js";
+import { Op } from "sequelize";
 /**
  * Controlador para manejar las operaciones relacionadas con los usuarios.
  * Este controlador incluye una función para obtener todos los usuarios con sus tareas asociadas.
@@ -62,6 +63,52 @@ async function getUser(req, res, next) {
   } catch (error) {
     //console.error("Error al obtener el usuario:", error);
     //logger.error("Error al obtener el usuario:", error);
+    // Manejo de errores
+    //return res.status(500).json({ message: "Error interno del servidor" });
+    next(error); // Pasar el error al middleware de manejo de errores
+  }
+}
+
+async function getList(req, res, next) {
+  // Implementar la lógica para obtener una lista de usuarios con paginación
+  // Puedes usar User.findAndCountAll() para obtener la lista y el conteo total
+  // Ejemplo de paginación con Sequelize
+  // Aquí se asume que tienes un modelo User y que estás usando Sequelize como ORM
+  const { page = 1, limit = 5 } = req.query; // Obtener los parámetros de paginación
+  const offset = (page - 1) * limit; // Calcular el offset para la paginación
+  const { search = '' } = req.query; // Obtener el término de búsqueda, si existe req.query.search
+  const {orderBy = 'username', orderDir = 'DESC'} = req.query; // Obtener el ordenamiento, si existe
+
+  if (orderDir !== 'ASC' && orderDir !== 'DESC') {
+    return res.status(400).json({ message: "Dirección de ordenamiento inválida" });
+  }
+
+  if (orderBy !== 'id' && orderBy !== 'username' && orderBy !== 'status') {
+    return res.status(400).json({ message: "Campo de ordenamiento inválido, debe ser id, username o status" });
+  }
+
+  if (limit < 5 || limit > 20) {
+    return res.status(400).json({ message: "El límite debe estar entre 5 y 20" });
+  }
+  
+  try {
+    const { count, rows } = await User.findAndCountAll({
+      offset: parseInt(offset, 10),
+      limit: parseInt(limit, 10),
+      order: [[orderBy, orderDir]], // Ordenar por fecha de creación, de más reciente a más antiguo
+      where: {
+        // Puedes agregar más condiciones de búsqueda aquí
+        username: { [Op.iLike]: `%${ search || ''}%` }, // Filtrar por nombre de usuario (opcional)
+        status: Status.ACTIVE, // Filtrar por estado activo
+      }
+    });
+    // total de paginas segun el limite
+    const pages = Math.ceil(count / limit); // Calcular el número total de páginas
+    
+    res.json({ total: count, page:page, pages: pages, users: rows });
+  } catch (error) {
+    //console.error("Error al obtener la lista de usuarios:", error);
+    //logger.error("Error al obtener la lista de usuarios:", error);
     // Manejo de errores
     //return res.status(500).json({ message: "Error interno del servidor" });
     next(error); // Pasar el error al middleware de manejo de errores
@@ -182,5 +229,6 @@ export default {
     updateUser,
     deleteUser,
     getTasks,
-    activeInactivatedUser
+    activeInactivatedUser,
+    getList
 }

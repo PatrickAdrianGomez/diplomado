@@ -27,4 +27,7 @@ router.route('/:id')
 
   router.get('/:id/tasks', authenticateToken, usersController.getTasks); // Obtener tareas de un usuario por ID
 
+
+router.route('/list/pagination')
+  .get(usersController.getList);
 export default router;

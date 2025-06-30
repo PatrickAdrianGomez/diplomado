@@ -6,7 +6,7 @@ import { sequelize } from './database/database.js';
 
 async function main() {
   try {
-    await sequelize.sync({ force: true }); // Sincronizar la base de datos, forzar la creación de tablas
+    await sequelize.sync({ force: false }); // Sincronizar la base de datos, forzar la creación de tablas
     console.log('Base de datos sincronizada correctamente');
     const puerto = config.PORT;
     app.listen(puerto);
