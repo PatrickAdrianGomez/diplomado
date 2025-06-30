@@ -6,6 +6,7 @@ const configs = {
     DB_DATABASE: process.env.DB_DATABASE,
     DB_DIALECT: process.env.DB_DIALECT,
     DB_PORT: process.env.DB_PORT,
+    DB_USE_SSL: process.env.DB_USE_SSL ?? false, // Convertir a booleano
 
     BCRYPT_SALT_ROUNDS: parseInt(process.env.BCRYPT_SALT_ROUNDS) ?? 10,
     JWT_SECRET: process.env.JWT_SECRET, //requireEnv('JWT_SECRET')
