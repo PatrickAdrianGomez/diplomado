@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize"; // Importar Sequelize desde el paquete sequelize
 import configs from "../config/env.js"; // Asegúrate de que la ruta sea correcta
-import { config } from "dotenv";
 
 export const sequelize = new Sequelize(
     configs.DB_DATABASE,
@@ -13,7 +12,7 @@ export const sequelize = new Sequelize(
         logging: false, // Desactivar logs de SQL
 
         dialectOptions:
-            config.DB_USE_SSL === "true" 
+            configs.DB_USE_SSL === "true" 
                 ? {
                     ssl: {
                         require: true,
